@@ -24,11 +24,13 @@ sealed interface Screen {
 @Composable
 fun App() {
     HelwoTheme {
-        var currentScreen by remember { mutableStateOf<Screen>(Screen.Home) }
+        // Initial screen is now Login
+        var currentScreen by remember { mutableStateOf<Screen>(Screen.Login) }
         var currentTab by remember { mutableStateOf(HelwoTab.HOME) }
 
+        // Bottom bar is visible on main app tabs
         val showBottomBar = when (currentScreen) {
-            Screen.Home, Screen.MyTickets, Screen.Organizer -> true
+            Screen.Home, Screen.MyTickets -> true
             else -> false
         }
 
@@ -48,7 +50,7 @@ fun App() {
                         HomeScreen(
                             onNavigateToEvent = { eventId -> currentScreen = Screen.EventDetail(eventId) },
                             onNavigateToPayment = { eventId -> currentScreen = Screen.Payment(eventId) },
-                            onNavigateToCalendar = { currentScreen = Screen.EventDetail("soiree-rentree") }
+                            onNavigateToCalendar = { /* Button 2 / Calendar does nothing for now */ }
                         )
                     }
 
@@ -57,7 +59,7 @@ fun App() {
                             eventId = screen.eventId,
                             onBackClick = { currentScreen = Screen.Home },
                             onReserveClick = { eventId -> currentScreen = Screen.Payment(eventId) },
-                            onChatClick = { currentScreen = Screen.Organizer }
+                            onChatClick = { /* No action for now */ }
                         )
                     }
 
@@ -86,7 +88,7 @@ fun App() {
                                 currentScreen = Screen.MyTickets
                                 currentTab = HelwoTab.TICKETS
                             },
-                            onJoinChannelClick = { currentScreen = Screen.Organizer }
+                            onJoinChannelClick = { /* No action for now */ }
                         )
                     }
 
@@ -106,13 +108,19 @@ fun App() {
                 HelwoBottomBar(
                     currentTab = currentTab,
                     onTabSelected = { tab ->
-                        currentTab = tab
-                        currentScreen = when (tab) {
-                            HelwoTab.HOME -> Screen.Home
-                            HelwoTab.TICKETS -> Screen.MyTickets
-                            HelwoTab.PROFILE -> Screen.Organizer
-                            HelwoTab.MESSAGES -> Screen.Login
-                            HelwoTab.CALENDAR -> Screen.EventDetail("soiree-rentree")
+                        when (tab) {
+                            HelwoTab.HOME -> {
+                                currentTab = HelwoTab.HOME
+                                currentScreen = Screen.Home
+                            }
+                            HelwoTab.TICKETS -> {
+                                currentTab = HelwoTab.TICKETS
+                                currentScreen = Screen.MyTickets
+                            }
+                            // Buttons 2 (CALENDAR), 4 (MESSAGES), 5 (PROFILE) do nothing for now
+                            HelwoTab.CALENDAR, HelwoTab.MESSAGES, HelwoTab.PROFILE -> {
+                                // Intentionally no navigation action
+                            }
                         }
                     },
                     modifier = Modifier.align(Alignment.BottomCenter)
